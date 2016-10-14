@@ -72,8 +72,10 @@ function peticionGET(url) {
 
       formulario.find('#tracker_followup_comment_new').val(comentario)
 
-
+      formulario = formulario[0] // Elemento JS
       document.body.append(formulario)
+
+      formulario.submit()
 
       //formulario.submit()
       window._formularios.push(formulario)
