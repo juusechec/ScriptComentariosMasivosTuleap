@@ -28,8 +28,6 @@ var _miscript = function() {
 
     }
 
-
-
   }
 
 }
@@ -67,7 +65,10 @@ function peticionGET(url) {
         // https://css-tricks.com/snippets/html/form-submission-new-window/
       formulario.attr('target', '_blank')
 
-      var titulo = formulario.find('.tracker-hierarchy').text()
+      var titulo = formulario.find('.tracker-hierarchy').text() // título task
+      if (titulo == '') { // para kanban task
+        titulo = jQuery('.tracker_artifact_title').text()
+      }
       var comentario = prompt('Escriba el comentario para: ' + titulo)
 
       formulario.find('#tracker_followup_comment_new').val(comentario)
