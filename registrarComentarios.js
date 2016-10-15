@@ -19,10 +19,10 @@ var _miscript = function() {
 
       jQuery('#widget_plugin_tracker_myartifacts-0-ajax > div > ul > li > a')
         .each(function(i) {
-          console.log(this.href)
+          console.log('Task', this.href)
             //window.open(this.href, '_blank')
           var url = this.href
-          peticionGET(url)
+          peticionGET(url, enviarComentarioTask)
         })
 
     }
@@ -33,7 +33,7 @@ var _miscript = function() {
 
 jQuery(document).ready(_miscript)
 
-function peticionGET(url) {
+function peticionGET(url, listener) {
   jQuery.ajax({
       method: 'GET',
       url: url,
@@ -57,29 +57,72 @@ function peticionGET(url) {
       }
     })
     .done(function(respuestaHTML) {
-      var inicio = respuestaHTML.indexOf('<form action="/plugins/tracker/\?aid=')
-      var final = respuestaHTML.indexOf('</form>', inicio)
-      var formulario = respuestaHTML.substring(inicio, final)
-      formulario = jQuery(formulario)
-        // https://css-tricks.com/snippets/html/form-submission-new-window/
-      formulario.attr('target', '_blank')
-
-      var titulo = formulario.find('.tracker-hierarchy').text() // título task
-      if (titulo === '') { // para kanban task
-        titulo = formulario.find('.tracker_artifact_title').text()
-      }
-      var comentario = prompt('Escriba el comentario para: ' + titulo)
-
-      formulario.find('#tracker_followup_comment_new').val(comentario)
-
-      formulario = formulario[0] // Elemento JS
-      document.body.append(formulario)
-
-      if (comentario !== '' && comentario !== null) {
-        //formulario.submit()
-        formulario.elements['submit_and_stay'].click() // for Submit and Stay
-        window._formularios.push(formulario)
-      }
-
+      listener(respuestaHTML)
     })
+}
+
+function enviarComentarioTask(respuestaHTML) {
+  var inicio = respuestaHTML.indexOf('<form action="/plugins/tracker/\?aid=')
+  var final = respuestaHTML.indexOf('</form>', inicio)
+  var formulario = respuestaHTML.substring(inicio, final)
+  formulario = jQuery(formulario)
+    // https://css-tricks.com/snippets/html/form-submission-new-window/
+  formulario.attr('target', '_blank')
+
+  var titulo = formulario.find('.tracker-hierarchy').text() // título task
+  if (titulo === '') { // para kanban task
+    titulo = formulario.find('.tracker_artifact_title').text()
+  }
+  var comentario = prompt('Escriba el comentario para: ' + titulo)
+
+  formulario.find('#tracker_followup_comment_new').val(comentario)
+
+  formulario = formulario[0] // Elemento JS
+
+  if (comentario !== '' && comentario !== null) {
+    //formulario.submit()
+    document.body.append(formulario)
+    formulario.elements['submit_and_stay'].click() // for Submit and Stay
+    window._formularios.push(formulario)
+
+    formulario = jQuery(formulario)
+    var story = formulario.find('.xref-in-title').text() // ex: 'epic #1764 -story #4893 -task #4897 -'
+    var inicio = story.indexOf('story #')
+    if (inicio > -1) {
+      inicio = inicio + 7 // 7 is length 'story #'
+      var fin = story.indexOf('-', inicio)
+      story = Number(story.substring(inicio, fin)) // between
+      descontarPuntosStory(story)
+    } else {
+      console.log('No Story', story)
+    }
+
+  }
+}
+
+
+function descontarPuntosStory(storyNumber) {
+  var url = '/plugins/tracker/?aid=' + storyNumber
+  console.log('Story', url)
+  peticionGET(url, function(respuestaHTML) {
+    var inicio = respuestaHTML.indexOf('<form action="/plugins/tracker/\?aid=')
+    var final = respuestaHTML.indexOf('</form>', inicio)
+    var formulario = respuestaHTML.substring(inicio, final)
+    formulario = jQuery(formulario)
+      // https://css-tricks.com/snippets/html/form-submission-new-window/
+    formulario.attr('target', '_blank')
+
+    var puntosRestantes = Number(formulario.find('.tracker_artifact_field-float > div:nth-child(3) > input').val())
+
+    if (puntosRestantes >= 10) {
+      puntosRestantes = puntosRestantes - 10
+      formulario.find('.tracker_artifact_field-float > div:nth-child(3) > input').val(String(puntosRestantes))
+      console.log('puntosRestantes', puntosRestantes)
+      formulario = formulario[0]
+      document.body.append(formulario)
+      formulario.elements['submit_and_stay'].click()
+      window._formularios.push(formulario)
+    }
+
+  })
 }
