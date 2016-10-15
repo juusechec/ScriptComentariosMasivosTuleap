@@ -16,7 +16,6 @@ var _miscript = function() {
     console.log(comentar)
 
     if (comentar === 'si') {
-      window._abrirEnlaces = prompt('Abrir enlaces después de comentar? si/no')
 
       jQuery('#widget_plugin_tracker_myartifacts-0-ajax > div > ul > li > a')
         .each(function(i) {
@@ -66,8 +65,8 @@ function peticionGET(url) {
       formulario.attr('target', '_blank')
 
       var titulo = formulario.find('.tracker-hierarchy').text() // título task
-      if (titulo == '') { // para kanban task
-        titulo = jQuery('.tracker_artifact_title').text()
+      if (titulo === '') { // para kanban task
+        titulo = formulario.find('.tracker_artifact_title').text()
       }
       var comentario = prompt('Escriba el comentario para: ' + titulo)
 
@@ -76,9 +75,11 @@ function peticionGET(url) {
       formulario = formulario[0] // Elemento JS
       document.body.append(formulario)
 
-      formulario.submit()
+      if (comentario !== '' && comentario !== null) {
+        //formulario.submit()
+        formulario.elements['submit_and_stay'].click() // for Submit and Stay
+        window._formularios.push(formulario)
+      }
 
-      //formulario.submit()
-      window._formularios.push(formulario)
-    });
+    })
 }
