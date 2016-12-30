@@ -1,7 +1,10 @@
 // ==UserScript==
-// @name        Registrar tarea
+// @name        Registrar Novedad Tarea
 // @namespace   OAS
+// @include     http://tuleap.udistrital.edu.co/my/*
 // @include     http://tuleap.udistrital.edu.co/my/
+// @include     https://tuleap.udistrital.edu.co/my/*
+// @include     https://tuleap.udistrital.edu.co/my/
 // @version     1
 // @grant       none
 // ==/UserScript==
@@ -65,7 +68,7 @@ function enviarComentarioTask(respuestaHTML) {
   var inicio = respuestaHTML.indexOf('<form action="/plugins/tracker/\?aid=')
   var final = respuestaHTML.indexOf('</form>', inicio)
   var formulario = respuestaHTML.substring(inicio, final)
-  formulario = jQuery(formulario)
+  formulario = jQuery(formulario) // Elemento jQuery 
     // https://css-tricks.com/snippets/html/form-submission-new-window/
   formulario.attr('target', '_blank')
 
@@ -78,6 +81,7 @@ function enviarComentarioTask(respuestaHTML) {
   formulario.find('#tracker_followup_comment_new').val(comentario)
 
   formulario = formulario[0] // Elemento JS
+  ponerEnOnGoing(formulario)
 
   if (comentario !== '' && comentario !== null) {
     //formulario.submit()
@@ -125,4 +129,15 @@ function descontarPuntosStory(storyNumber) {
     }
 
   })
+}
+
+function ponerEnOnGoing(formulario){ //Elemento JS!!!
+  formulario = jQuery(formulario) // jQuery Element
+  var option = formulario.find("option[title='On going']")
+  if (option.length === 0){
+    option = formulario.find("option[title='On Going']")
+  }
+  var select = option.parent()
+  //select.val("On going").change()
+  option.attr('selected','selected')
 }
